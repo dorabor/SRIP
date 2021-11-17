@@ -63,3 +63,149 @@ except Exception:passctr += 1if __name__ == "__main__":#otkrivas ime tvog filea:
 #h=hash('boric_dora')
 
 #print(h)brute_force()
+
+## 3.Laboratorijska vjezba
+
+Kod:
+
+from cryptography.hazmat.primitives import hashes, hmac
+
+from cryptography.exceptions import InvalidSignature
+
+from cryptography.hazmat.primitives.asymmetric import padding
+
+import os
+
+from cryptography.hazmat.primitives import serialization
+
+from cryptography.hazmat.backends import default_backend
+
+def generate_MAC(key, message):
+
+if not isinstance(message, bytes):
+
+message = message.encode()
+
+h = hmac.HMAC(key, hashes.SHA256())
+
+h.update(message)
+
+signature = h.finalize()
+
+return signature
+
+def verify_MAC(key, signature, message):
+
+if not isinstance(message, bytes):
+
+message = message.encode()
+
+h = hmac.HMAC(key, hashes.SHA256())
+
+h.update(message)
+
+try:
+
+h.verify(signature)
+
+except InvalidSignature:
+
+return False
+
+else:
+
+return True
+
+def verify_signature_rsa(signature, message):
+
+PUBLIC_KEY = load_public_key()
+
+try:
+
+PUBLIC_KEY.verify(
+
+signature,
+
+message,
+
+padding.PSS(
+
+mgf=padding.MGF1(hashes.SHA256()),
+
+salt_length=padding.PSS.MAX_LENGTH
+
+),
+
+hashes.SHA256()
+
+)
+
+except InvalidSignature:
+
+return False
+
+else:
+
+return True
+
+def load_public_key(PUBLIC_KEY_FILE):
+
+with open(PUBLIC_KEY_FILE, "rb") as f:
+
+PUBLIC_KEY = serialization.load_pem_public_key(
+
+f.read(),
+
+backend=default_backend()
+
+)
+
+return PUBLIC_KEY
+
+if __name__=="__main__":
+
+key = "boric_dora".encode()
+
+path = os.path.join("challenges", "boric_dora", "mac_challenge")
+
+print(path)
+
+#with open("message.txt", "rb") as file:
+
+# content = file.read()
+
+# mac = generate_MAC(key, content)
+
+# with open("message.sig", "wb") as file:
+
+# file.write(mac)
+
+#with open("message.sig", "rb") as file:
+
+# signature = file.read()
+
+#is_authentic = verify_MAC(key,signature, content)
+
+#print(is_authentic)
+
+for ctr in range(1, 11):
+
+msg_filename = f"order_{ctr}.txt"
+
+file_path_msg = os.path.join(path, msg_filename)
+
+sig_filename = f"order_{ctr}.sig"
+
+file_path_sig = os.path.join(path, sig_filename)
+
+with open(file_path_msg, "rb") as file:
+
+content_file = file.read()
+
+with open(file_path_sig, "rb") as file:
+
+signature = file.read()
+
+is_authentic = verify_MAC(key,signature, content_file)
+
+print(f'Message {content_file.decode():>45} {"OK" if is_authentic else "NOK":<6}')
