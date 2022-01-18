@@ -391,3 +391,48 @@ if __name__ == "__main__":
         average_time = round(total_time/ITERATIONS, 6)
         table.add_row([name, average_time])
         print(f"{table}\n\n")
+
+
+## 5. i 6. laboratorijska vjezba(grupa koja je kasnila)
+# Vježba 5
+U 5oj vježbi se analizira ranjivost lozinki prilikom offline i online pswd guessing attack.
+-u offline napadu napadač nema interakciju sa serverom
+-u online napadu ima s legitimnim serverom.
+Ovdje govorimo o brute force napadima
+
+ONLINE
+vaki student ima podignut svoj Docker kontejner s vlastitom IP adredom i korisničkim imenom.
+Ovdje ćemo koristiti alat HYDRA koji oponaša ssh kljinta u testira sve moguće lozinke.
+Naredbe: hydra -l boric_dora -x 4:5:a 10:0.15.15 -V -t 1 ssh 
+(koristimo riječnik) hydra boric_dora -P dictionary/g3/dictionary_online.txt 10.0.15.15 -V -t 4 ssh
+
+Rezultat je pronalazak odgovarajuće lozinke kojom se možemo prijaviti na svoj virtualni stroj.
+
+# Vježba 6
+Prolazimo kroz onovne postupke upravljanja korisničkim računima na Linux OS s naglaskom na kontrolu pristupa datotekama, programima i
+drugim resursima Linux sustava.
+
+Kreiranjem korisnika/usera preko Linux Bash Shell korisnicima su dodjeljena prava različitih grupa.
+tako ona mogu biti administratorska, ali i ne moraju.
+Sudo grupa ima administratorska prava, predstavljaju admin te pomoću nje kreiramo dva korisnička računa.
+sudo adduser alice3 i kasnije bob3
+
+Pomoću security.txt kriramo datoteku preko koje ćemo testirati razine prava ova dva korisnika.
+
+Naredbom getfalc provjeravama ta prava(citanje, pisanje,..) kao i dopuštenja definirana za pojedine direktorije
+
+Trenutnom korisniku koji je vlasnik neke datoeke se prava mogu oduzeti koristeći skup naredbi chmod na sljedeći naćin:
+chmod u-r security.txt
+
+Ili dodjeliti prava tako da korisnika dodama u grupu korisnika npr. alice3 čiji članovui imaju mogućnost čitanja datoteke security.txt
+usermod -aG <alice3> bob3
+
+Kontrola pristupa korištenjem ACL. 
+Ovim putem drugom korisniku dajemo pristup nekom direktoriju ako ga dodamo u  željene datoteke bez potrebe za dodavanjem u novu grupu.
+setfacl -m u:bob3:r security.txt
+    
+A uklanjanje iz ACL je: setfacl -x u:bob3 security.txt
+
+Sada možemo proučitikako Linux reagira na programe u izvođenju i kontroliranje pristupa njih.
+Pokrenemo kao korisnik student koji je vlasni datoteke u kojoj se nalazi program koji pokreće skriptu koja će pokušati pritupiti datoteci security.txt i dobije poruku da je odbijen.
+Korisnik bob3 nije vlasnik datoteke sa skriptom. ali njezinim pokretanjem joj može pristupiti.
